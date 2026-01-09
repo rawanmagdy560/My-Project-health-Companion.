@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>رفيقك الصحي - أقرب المستشفيات</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap');
+        :root {
+            color-scheme: dark;
+            --bg-base: #020617;
+            --bg-deep: #0b1220;
+            --accent-1: #38bdf8;
+            --accent-2: #c084fc;
+            --accent-3: #f472b6;
+            --accent-4: #5eead4;
+            --glass: rgba(15, 23, 42, 0.62);
+            --glass-border: rgba(148, 163, 184, 0.28);
+            --glass-highlight: rgba(255, 255, 255, 0.08);
+            --text-primary: #e0f2fe;
+            --text-secondary: rgba(224, 242, 254, 0.94);
+            --text-muted: rgba(186, 230, 253, 0.78);
+            --transition-curve: cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+        ::selection {
+            background: rgba(124, 58, 237, 0.4);
+            color: var(--text-primary);
+        }
+        body {
+            font-family: 'Tajawal', sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            background: var(--bg-base);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            position: relative;
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            inset: -15%;
+            background:
+                radial-gradient(circle at 22% 18%, rgba(56, 189, 248, 0.28), transparent 58%),
+                radial-gradient(circle at 76% 12%, rgba(192, 132, 252, 0.36), transparent 60%),
+                radial-gradient(circle at 48% 86%, rgba(244, 114, 182, 0.24), transparent 60%);
+            opacity: 0.82;
+            filter: saturate(135%);
+            z-index: -6;
+            animation: backgroundPulse 38s ease-in-out infinite alternate;
+        }
+        body::after {
+            content: "";
+            position: fixed;
+            inset: -40%;
+            background: conic-gradient(from 120deg, rgba(99, 102, 241, 0.18), transparent 40%, rgba(56, 189, 248, 0.22), transparent 78%);
+            opacity: 0.6;
+            filter: blur(130px);
+            z-index: -7;
+            animation: auroraDrift 48s linear infinite;
+        }
+        .gradient-bg {
+            position: relative;
+            min-height: 100vh;
+            z-index: 0;
+        }
+        .gradient-bg::before,
+        .gradient-bg::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: -5;
+        }
+        .gradient-bg::before {
+            background: linear-gradient(120deg, rgba(15, 23, 42, 0.92), rgba(30, 58, 138, 0.62), rgba(124, 58, 237, 0.5), rgba(45, 212, 191, 0.3));
+            mix-blend-mode: screen;
+            opacity: 0.9;
+        }
+        .gradient-bg::after {
+            background: url("{{ url_for('health_background') }}") center/cover no-repeat;
+            opacity: 0.3;
+            filter: brightness(0.5) saturate(1.35) contrast(1.16);
+            transform: scale(1.2);
+            animation: heroParallax 52s cubic-bezier(0.22, 1, 0.36, 1) infinite alternate;
+        }
+        .ambient-lights {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: -4;
+            overflow: hidden;
+        }
+        .ambient-lights span {
+            position: absolute;
+            width: clamp(200px, 30vw, 360px);
+            height: clamp(200px, 30vw, 360px);
+            border-radius: 9999px;
+            opacity: 0.45;
+            filter: blur(90px);
+            animation: floatOrbit 30s ease-in-out infinite;
+        }
+        .ambient-lights .ambient--one {
+            top: -8%;
+            right: -10%;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.6), transparent 65%);
+            animation-delay: -6s;
+        }
+        .ambient-lights .ambient--two {
+            bottom: -12%;
+            left: -8%;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.52), transparent 70%);
+            animation-delay: -12s;
+        }
+        .ambient-lights .ambient--three {
+            top: 32%;
+            left: 40%;
+            background: radial-gradient(circle, rgba(244, 114, 182, 0.4), transparent 70%);
+            animation-delay: -20s;
+        }
+        header {
+            padding: 2.5rem 1.5rem 1.5rem;
+        }
+        .nav-shell {
+            background: rgba(15, 23, 42, 0.66);
+            border: 1px solid var(--glass-border);
+            border-radius: 1.85rem;
+            padding: 1rem 1.6rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            box-shadow: 0 28px 60px rgba(8, 47, 73, 0.45);
+            backdrop-filter: blur(26px);
+        }
+        .nav-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .nav-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 1.3rem;
+            display: grid;
+            place-items: center;
+            background: rgba(56, 189, 248, 0.24);
+            color: var(--text-primary);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            transition: transform 0.4s var(--transition-curve), background 0.4s var(--transition-curve);
+        }
+        .nav-icon:hover {
+            transform: translateX(4px);
+            background: rgba(56, 189, 248, 0.32);
+        }
+        .nav-title {
+            margin: 0;
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .nav-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.75rem 1.4rem;
+            border-radius: 1.1rem;
+            background: rgba(248, 113, 113, 0.18);
+            color: #fee2e2;
+            font-weight: 600;
+            border: 1px solid rgba(248, 113, 113, 0.4);
+            transition: transform 0.4s var(--transition-curve), background 0.4s var(--transition-curve);
+        }
+        .nav-action:hover {
+            transform: translateY(-2px);
+            background: rgba(248, 113, 113, 0.24);
+        }
+        main {
+            padding: 2.5rem 1.5rem 4rem;
+        }
+        .glass-panel {
+            position: relative;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 2rem;
+            padding: 2.5rem;
+            backdrop-filter: blur(28px);
+            box-shadow: 0 40px 80px rgba(8, 47, 73, 0.45);
+            overflow: hidden;
+        }
+        .glass-panel::before {
+            content: "";
+            position: absolute;
+            inset: 1.5px;
+            border-radius: inherit;
+            border: 1px solid var(--glass-highlight);
+            opacity: 0.8;
+            pointer-events: none;
+        }
+        .glass-panel::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, transparent 35%, rgba(148, 163, 184, 0.22));
+            opacity: 0;
+            transition: opacity 0.55s var(--transition-curve);
+            pointer-events: none;
+        }
+        .glass-panel:hover::after {
+            opacity: 1;
+        }
+        .glass-content {
+            position: relative;
+            z-index: 2;
+        }
+        .section-title {
+            font-size: clamp(1.9rem, 2.6vw, 2.3rem);
+            font-weight: 700;
+            margin: 0;
+            color: var(--text-primary);
+        }
+        .section-subtitle {
+            margin: 0;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+        .search-shell {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        .search-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        @media (min-width: 640px) {
+            .search-form {
+                flex-direction: row;
+                align-items: center;
+            }
+        }
+        .search-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        .input-control {
+            width: 100%;
+            padding: 0.95rem 1.1rem;
+            border-radius: 1rem;
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.55));
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            transition: border-color 0.45s var(--transition-curve), box-shadow 0.45s var(--transition-curve), transform 0.45s var(--transition-curve);
+        }
+        .input-control::placeholder {
+            color: var(--text-muted);
+        }
+        .input-control:focus {
+            outline: none;
+            border-color: rgba(56, 189, 248, 0.85);
+            box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25), 0 22px 55px rgba(8, 47, 73, 0.45);
+            transform: translateY(-2px);
+        }
+        .mini-button {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            padding: 0.8rem 1.2rem;
+            border-radius: 1rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            border: 1px solid transparent;
+            transition: transform 0.45s var(--transition-curve), box-shadow 0.45s var(--transition-curve), border-color 0.45s var(--transition-curve), background 0.45s var(--transition-curve);
+        }
+        .mini-button--primary {
+            background: linear-gradient(120deg, rgba(59, 130, 246, 0.9), rgba(129, 140, 248, 0.9), rgba(139, 92, 246, 0.9));
+            color: #f8fafc;
+            box-shadow: 0 22px 45px rgba(56, 189, 248, 0.28);
+        }
+        .mini-button--primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 26px 55px rgba(56, 189, 248, 0.36);
+        }
+        .mini-button--ghost {
+            background: rgba(15, 23, 42, 0.55);
+            border-color: rgba(148, 163, 184, 0.32);
+            color: var(--text-primary);
+        }
+        .mini-button--ghost:hover {
+            transform: translateY(-2px);
+            border-color: rgba(56, 189, 248, 0.45);
+            background: rgba(56, 189, 248, 0.18);
+        }
+        .action-button {
+            position: relative;
+            width: 100%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.65rem;
+            border-radius: 1.1rem;
+            border: none;
+            padding: 1.05rem 1.4rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            background: linear-gradient(120deg, #f8fafc, #c7d2fe, #bae6fd);
+            color: #1e293b;
+            box-shadow: 0 32px 65px rgba(56, 189, 248, 0.35);
+            transition: transform 0.55s var(--transition-curve), box-shadow 0.55s var(--transition-curve);
+        }
+        .action-button::after {
+            content: "";
+            position: absolute;
+            inset: 2px;
+            border-radius: inherit;
+            background: linear-gradient(120deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.18));
+            opacity: 0;
+            transition: opacity 0.55s var(--transition-curve);
+        }
+        .action-button:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 35px 70px rgba(56, 189, 248, 0.42);
+        }
+        .action-button:hover::after {
+            opacity: 1;
+        }
+        .action-button:active {
+            transform: translateY(-1px) scale(0.99);
+        }
+        .action-button--accent {
+            background: linear-gradient(120deg, rgba(59, 130, 246, 0.92), rgba(129, 140, 248, 0.92), rgba(139, 92, 246, 0.92));
+            color: #f8fafc;
+        }
+        .status-banner {
+            min-height: 3.25rem;
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1.2rem;
+            border-radius: 1.2rem;
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            background: rgba(15, 23, 42, 0.55);
+            color: var(--text-secondary);
+            font-weight: 600;
+            transition: border-color 0.4s var(--transition-curve), background 0.4s var(--transition-curve), color 0.4s var(--transition-curve);
+        }
+        .status-banner--info {
+            border-color: rgba(129, 140, 248, 0.35);
+            background: rgba(129, 140, 248, 0.18);
+            color: #e0e7ff;
+        }
+        .status-banner--success {
+            border-color: rgba(34, 197, 94, 0.4);
+            background: rgba(34, 197, 94, 0.2);
+            color: #bbf7d0;
+        }
+        .status-banner--error {
+            border-color: rgba(248, 113, 113, 0.45);
+            background: rgba(248, 113, 113, 0.22);
+            color: #fecaca;
+        }
+        .hospital-card {
+            position: relative;
+            background: rgba(15, 23, 42, 0.72);
+            border-radius: 1.6rem;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            padding: 1.8rem;
+            box-shadow: 0 28px 55px rgba(8, 47, 73, 0.45);
+            transition: transform 0.45s var(--transition-curve), border-color 0.45s var(--transition-curve), box-shadow 0.45s var(--transition-curve);
+        }
+        .hospital-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(56, 189, 248, 0.45);
+            box-shadow: 0 32px 65px rgba(15, 23, 42, 0.55);
+        }
+        .hospital-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0;
+            color: var(--text-primary);
+        }
+        .nearest-badge {
+            margin-top: 0.4rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            border-radius: 999px;
+            background: rgba(192, 132, 252, 0.25);
+            border: 1px solid rgba(192, 132, 252, 0.45);
+            padding: 0.35rem 0.8rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #f3e8ff;
+        }
+        .hospital-info {
+            margin: 0;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+        .hospital-muted {
+            color: rgba(148, 163, 184, 0.85);
+        }
+        .hospital-link-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            align-items: center;
+            color: rgba(56, 189, 248, 0.9);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+        .link-accent {
+            color: rgba(56, 189, 248, 0.95);
+            text-decoration: underline;
+        }
+        .link-primary {
+            color: rgba(129, 140, 248, 0.95);
+            text-decoration: underline;
+            display: inline-block;
+            margin-top: 0.4rem;
+        }
+        .empty-state {
+            border-radius: 1.6rem;
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            background: rgba(15, 23, 42, 0.6);
+            color: rgba(224, 242, 254, 0.88);
+            padding: 1.6rem;
+            text-align: center;
+            font-weight: 600;
+        }
+        #pointer-glow {
+            position: fixed;
+            width: 220px;
+            height: 220px;
+            pointer-events: none;
+            margin: 0;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.32) 0%, rgba(56, 189, 248, 0.22) 40%, rgba(167, 139, 250, 0.14) 70%, transparent 100%);
+            filter: blur(14px);
+            opacity: 0;
+            transition: opacity 0.28s ease, transform 0.18s ease;
+            z-index: 25;
+            transform: translate3d(calc(var(--glow-x, 50vw) - 110px), calc(var(--glow-y, 50vh) - 110px), 0) scale(var(--glow-scale, 1));
+        }
+        #pointer-glow.is-pressed {
+            --glow-scale: 0.88;
+            opacity: 0.95;
+        }
+        body.is-pointer-active #pointer-glow {
+            opacity: 1;
+        }
+        @keyframes backgroundPulse {
+            0% {
+                transform: scale(1) translate3d(0, 0, 0);
+            }
+            50% {
+                transform: scale(1.05) translate3d(12px, -18px, 0);
+            }
+            100% {
+                transform: scale(1.08) translate3d(-14px, 16px, 0);
+            }
+        }
+        @keyframes auroraDrift {
+            0% {
+                transform: rotate(0deg) scale(1);
+            }
+            100% {
+                transform: rotate(360deg) scale(1.05);
+            }
+        }
+        @keyframes heroParallax {
+            0% {
+                transform: scale(1.12) translate3d(-2%, -1%, 0);
+            }
+            50% {
+                transform: scale(1.16) translate3d(2%, 2%, 0);
+            }
+            100% {
+                transform: scale(1.12) translate3d(-1%, 1%, 0);
+            }
+        }
+        @keyframes floatOrbit {
+            0% {
+                transform: translate3d(0, 0, 0) scale(1);
+            }
+            50% {
+                transform: translate3d(24px, -32px, 0) scale(1.05);
+            }
+            100% {
+                transform: translate3d(-18px, 28px, 0) scale(0.98);
+            }
+        }
+        @media (max-width: 768px) {
+            header {
+                padding: 2rem 1rem 1rem;
+            }
+            .nav-shell {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            main {
+                padding: 2rem 1rem 3rem;
+            }
+            .glass-panel {
+                padding: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen">
+    <div class="ambient-lights">
+        <span class="ambient ambient--one"></span>
+        <span class="ambient ambient--two"></span>
+        <span class="ambient ambient--three"></span>
+    </div>
+    <div class="relative z-10">
+        <header>
+            <div class="nav-shell max-w-6xl mx-auto">
+                <div class="nav-group">
+                    <a href="{{ url_for('dashboard') }}" class="nav-icon">
+                        <i data-feather="arrow-right" class="w-5 h-5"></i>
+                    </a>
+                    <h1 class="nav-title">أقرب المستشفيات</h1>
+                </div>
+                <a href="{{ url_for('logout') }}" class="nav-action">
+                    <i data-feather="log-out" class="w-5 h-5"></i>
+                    تسجيل الخروج
+                </a>
+            </div>
+        </header>
+        <main>
+            <div class="max-w-6xl mx-auto space-y-8">
+                <section class="glass-panel">
+                    <div class="glass-content">
+                        <div class="search-shell">
+                            <div class="space-y-2">
+                                <h2 class="section-title">اكتشف أقرب المستشفيات إلى موقعك</h2>
+                                <p class="section-subtitle">اسمح بالوصول إلى موقعك أو ابحث بالاسم لعرض بيانات المستشفيات القريبة وروابط مواقعها الإلكترونية.</p>
+                            </div>
+                            <form id="hospital-search-form" class="search-form">
+                                <input id="hospital-search" type="text" placeholder="ابحث باسم المستشفى" class="input-control">
+                                <div class="search-actions">
+                                    <button type="submit" class="mini-button mini-button--primary">بحث بالاسم</button>
+                                    <button type="button" id="hospital-reset" class="mini-button mini-button--ghost">إعادة ضبط</button>
+                                </div>
+                            </form>
+                            <button type="button" id="hospital-nearby" class="action-button action-button--accent">عرض أقرب المستشفيات إلى موقعي</button>
+                            <div class="status-banner status-banner--info" id="status-message"></div>
+                        </div>
+                    </div>
+                </section>
+                <section class="glass-panel">
+                    <div class="glass-content">
+                        <div id="hospitals-list" class="space-y-4"></div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+    <script>
+        const defaultLocation = { lat: 30.04241, lng: 31.23591 };
+        let currentLocation = null;
+        let currentSearchQuery = '';
+        let currentMode = null;
+
+        function updateStatus(message, tone = 'info') {
+            const statusEl = document.getElementById('status-message');
+            if (!statusEl) {
+                return;
+            }
+            statusEl.textContent = message || '';
+            statusEl.className = 'status-banner';
+            if (tone === 'error') {
+                statusEl.classList.add('status-banner--error');
+            } else if (tone === 'success') {
+                statusEl.classList.add('status-banner--success');
+            } else {
+                statusEl.classList.add('status-banner--info');
+            }
+        }
+
+        function clearHospitalsList() {
+            const listEl = document.getElementById('hospitals-list');
+            if (listEl) {
+                listEl.innerHTML = '';
+            }
+        }
+
+        function renderHospitals(hospitals) {
+            const listEl = document.getElementById('hospitals-list');
+            if (!listEl) {
+                return;
+            }
+            listEl.innerHTML = '';
+            if (!hospitals.length) {
+                const emptyState = document.createElement('div');
+                emptyState.className = 'empty-state';
+                emptyState.textContent = 'لا توجد مستشفيات للعرض في الوقت الحالي.';
+                listEl.appendChild(emptyState);
+                return;
+            }
+            hospitals.forEach((hospital, index) => {
+                const card = document.createElement('div');
+                card.className = 'hospital-card space-y-3';
+                const title = document.createElement('h4');
+                title.className = 'hospital-name';
+                title.textContent = hospital.name || 'مستشفى';
+                card.appendChild(title);
+                if (currentMode === 'nearby' && index === 0) {
+                    const nearestBadge = document.createElement('span');
+                    nearestBadge.className = 'nearest-badge';
+                    nearestBadge.textContent = 'الأقرب إليك';
+                    card.appendChild(nearestBadge);
+                }
+                if (hospital.address) {
+                    const address = document.createElement('p');
+                    address.className = 'hospital-info';
+                    address.textContent = hospital.address;
+                    card.appendChild(address);
+                }
+                const googleLink = hospital.google_map_url && hospital.location ? hospital.google_map_url : (hospital.location ? `https://www.google.com/maps/search/?api=1&query=${hospital.location.lat},${hospital.location.lng}` : null);
+                if (googleLink) {
+                    const locationRow = document.createElement('p');
+                    locationRow.className = 'hospital-link-row';
+                    const locationLabel = document.createElement('span');
+                    locationLabel.textContent = 'الموقع:';
+                    locationRow.appendChild(locationLabel);
+                    const locationAnchor = document.createElement('a');
+                    locationAnchor.href = googleLink;
+                    locationAnchor.target = '_blank';
+                    locationAnchor.rel = 'noopener';
+                    locationAnchor.className = 'link-accent';
+                    locationAnchor.textContent = 'فتح في خرائط جوجل';
+                    locationRow.appendChild(locationAnchor);
+                    card.appendChild(locationRow);
+                }
+                if (hospital.website) {
+                    const website = document.createElement('a');
+                    website.className = 'link-primary';
+                    website.href = hospital.website;
+                    website.target = '_blank';
+                    website.rel = 'noopener';
+                    website.textContent = 'الموقع الإلكتروني';
+                    card.appendChild(website);
+                }
+                if (hospital.phone) {
+                    const phone = document.createElement('p');
+                    phone.className = 'hospital-info';
+                    phone.textContent = `الهاتف: ${hospital.phone}`;
+                    card.appendChild(phone);
+                }
+                if (hospital.opening_hours) {
+                    const hours = document.createElement('p');
+                    hours.className = 'hospital-info hospital-muted';
+                    hours.textContent = `ساعات العمل: ${hospital.opening_hours}`;
+                    card.appendChild(hours);
+                }
+                if (hospital.distance_meters != null) {
+                    const distanceValue = hospital.distance_meters >= 1000 ? `${(hospital.distance_meters / 1000).toFixed(2)} كم` : `${Math.round(hospital.distance_meters)} متر`;
+                    const distance = document.createElement('p');
+                    distance.className = 'hospital-info hospital-muted';
+                    distance.textContent = `المسافة التقديرية: ${distanceValue}`;
+                    card.appendChild(distance);
+                }
+                if (hospital.tags) {
+                    const details = [];
+                    if (hospital.tags.operator) {
+                        details.push(`الجهة المشغلة: ${hospital.tags.operator}`);
+                    }
+                    if (hospital.tags.emergency) {
+                        details.push(`الطوارئ: ${hospital.tags.emergency}`);
+                    }
+                    if (details.length) {
+                        const extra = document.createElement('p');
+                        extra.className = 'hospital-info hospital-muted';
+                        extra.textContent = details.join(' | ');
+                        card.appendChild(extra);
+                    }
+                }
+                listEl.appendChild(card);
+            });
+        }
+
+        function requestHospitals(params, pendingMessage) {
+            updateStatus(pendingMessage, 'info');
+            return fetch(`/api/hospitals?${params.toString()}`)
+                .then(response => response.json().then(data => ({ ok: response.ok, data })))
+                .then(result => {
+                    if (!result.ok) {
+                        updateStatus(result.data.error || 'حدث خطأ غير متوقع.', 'error');
+                        renderHospitals([]);
+                        return;
+                    }
+                    const hospitals = Array.isArray(result.data.hospitals) ? result.data.hospitals : [];
+                    if (!hospitals.length) {
+                        if (currentMode === 'search' && currentSearchQuery) {
+                            updateStatus(`لا توجد نتائج لـ "${currentSearchQuery}".`, 'info');
+                        } else if (currentMode === 'nearby') {
+                            updateStatus('لم يتم العثور على مستشفيات قريبة.', 'info');
+                        } else {
+                            updateStatus('لا توجد بيانات متاحة.', 'info');
+                        }
+                        renderHospitals([]);
+                        return;
+                    }
+                    if (currentMode === 'search' && currentSearchQuery) {
+                        updateStatus(`تم العثور على ${hospitals.length} نتيجة لـ "${currentSearchQuery}".`, 'success');
+                    } else if (currentMode === 'nearby') {
+                        updateStatus(`تم العثور على ${hospitals.length} مستشفى قريب.`, 'success');
+                    } else {
+                        updateStatus('تم جلب بيانات المستشفيات.', 'success');
+                    }
+                    renderHospitals(hospitals);
+                })
+                .catch(() => {
+                    updateStatus('تعذر الاتصال بالخادم.', 'error');
+                    renderHospitals([]);
+                });
+        }
+
+        function fetchHospitalsByName(query) {
+            const trimmed = query.trim();
+            if (!trimmed) {
+                updateStatus('الرجاء إدخال اسم المستشفى.', 'error');
+                clearHospitalsList();
+                return;
+            }
+            currentMode = 'search';
+            currentSearchQuery = trimmed;
+            const params = new URLSearchParams({ mode: 'search', query: trimmed });
+            requestHospitals(params, `جاري البحث عن "${trimmed}"...`);
+        }
+
+        function fetchNearestHospitals() {
+            currentMode = 'nearby';
+            const execute = location => {
+                currentLocation = location;
+                const params = new URLSearchParams({ mode: 'nearby', lat: location.lat, lng: location.lng });
+                requestHospitals(params, 'جاري تحميل أقرب المستشفيات...');
+            };
+            if (currentLocation) {
+                execute(currentLocation);
+                return;
+            }
+            if (!navigator.geolocation) {
+                updateStatus('المتصفح لا يدعم تحديد الموقع. تم استخدام موقع افتراضي.', 'error');
+                execute(defaultLocation);
+                return;
+            }
+            updateStatus('جاري الحصول على موقعك...', 'info');
+            navigator.geolocation.getCurrentPosition(
+                position => {
+                    const location = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    execute(location);
+                },
+                () => {
+                    updateStatus('تعذر الحصول على موقعك. تم استخدام موقع افتراضي.', 'error');
+                    execute(defaultLocation);
+                }
+            );
+        }
+
+        const initPointerGlow = () => {
+            if (document.getElementById('pointer-glow')) return;
+            const glow = document.createElement('span');
+            glow.id = 'pointer-glow';
+            document.body.appendChild(glow);
+            const setPosition = (x, y) => {
+                glow.style.setProperty('--glow-x', `${x}px`);
+                glow.style.setProperty('--glow-y', `${y}px`);
+            };
+            const activate = () => document.body.classList.add('is-pointer-active');
+            const deactivate = () => document.body.classList.remove('is-pointer-active');
+            window.addEventListener('pointermove', (event) => {
+                activate();
+                setPosition(event.clientX, event.clientY);
+            }, { passive: true });
+            window.addEventListener('pointerdown', () => glow.classList.add('is-pressed'));
+            window.addEventListener('pointerup', () => glow.classList.remove('is-pressed'));
+            window.addEventListener('pointerleave', deactivate);
+            window.addEventListener('touchstart', (event) => {
+                const primary = event.touches[0];
+                if (!primary) return;
+                activate();
+                setPosition(primary.clientX, primary.clientY);
+            }, { passive: true });
+            window.addEventListener('touchmove', (event) => {
+                const primary = event.touches[0];
+                if (!primary) return;
+                setPosition(primary.clientX, primary.clientY);
+            }, { passive: true });
+            window.addEventListener('touchend', deactivate, { passive: true });
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            feather.replace();
+            initPointerGlow();
+            updateStatus('ابدأ بالبحث عن مستشفى أو استخدم زر الأقرب.', 'info');
+            const form = document.getElementById('hospital-search-form');
+            const input = document.getElementById('hospital-search');
+            const resetButton = document.getElementById('hospital-reset');
+            const nearbyButton = document.getElementById('hospital-nearby');
+            if (form && input) {
+                form.addEventListener('submit', event => {
+                    event.preventDefault();
+                    fetchHospitalsByName(input.value || '');
+                });
+            }
+            if (resetButton && input) {
+                resetButton.addEventListener('click', () => {
+                    input.value = '';
+                    currentSearchQuery = '';
+                    currentMode = null;
+                    clearHospitalsList();
+                    updateStatus('تمت إعادة ضبط النتائج.', 'info');
+                });
+            }
+            if (nearbyButton) {
+                nearbyButton.addEventListener('click', () => {
+                    currentSearchQuery = '';
+                    fetchNearestHospitals();
+                });
+            }
+        });
+    </script>
+</body>
+</html>

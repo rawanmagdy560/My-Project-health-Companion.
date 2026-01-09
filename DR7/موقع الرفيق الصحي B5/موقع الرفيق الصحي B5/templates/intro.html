@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>رفيقك الصحي - تعرف علينا</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap');
+        :root {
+            color-scheme: dark;
+            --text-primary: #e0f2fe;
+            --text-secondary: rgba(224, 242, 254, 0.92);
+            --text-muted: rgba(186, 230, 253, 0.78);
+        }
+        body {
+            font-family: 'Tajawal', sans-serif;
+            margin: 0;
+            background: radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.12), transparent 55%),
+                        radial-gradient(circle at 80% 0%, rgba(192, 132, 252, 0.14), transparent 50%), #020617;
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+        .gradient-bg {
+            position: relative;
+            display: block;
+        }
+        .gradient-bg::before,
+        .gradient-bg::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+        }
+        .gradient-bg::before {
+            background: url("{{ url_for('health_background') }}") center/cover no-repeat;
+            filter: brightness(0.52) saturate(1.2);
+            transform: scale(1.08);
+            z-index: -3;
+            animation: health-bg-pan 48s ease-in-out infinite alternate;
+        }
+        .gradient-bg::after {
+            background: linear-gradient(120deg, rgba(12, 74, 110, 0.78) 0%, rgba(15, 23, 42, 0.82) 42%, rgba(76, 29, 149, 0.87) 78%, rgba(124, 58, 237, 0.78) 100%);
+            mix-blend-mode: screen;
+            z-index: -2;
+        }
+        .decorative-layer {
+            position: fixed;
+            inset: -10%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+        .floating-orb {
+            position: absolute;
+            border-radius: 9999px;
+            backdrop-filter: blur(16px);
+            opacity: 0.42;
+            filter: saturate(130%);
+            animation: float-slow 22s ease-in-out infinite;
+        }
+        .floating-orb::after {
+            content: "";
+            position: absolute;
+            inset: 10%;
+            border-radius: inherit;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.65) 0%, transparent 65%);
+            opacity: 0.45;
+        }
+        .floating-orb--1 {
+            width: 420px;
+            height: 420px;
+            top: -120px;
+            right: -60px;
+            background: conic-gradient(from 140deg, rgba(59, 130, 246, 0.3), rgba(192, 132, 252, 0.55), rgba(59, 130, 246, 0.28));
+        }
+        .floating-orb--2 {
+            width: 320px;
+            height: 320px;
+            bottom: -120px;
+            left: -40px;
+            background: conic-gradient(from 20deg, rgba(56, 189, 248, 0.38), rgba(99, 102, 241, 0.46), rgba(56, 189, 248, 0.32));
+            animation-delay: -8s;
+        }
+        .floating-orb--3 {
+            width: 260px;
+            height: 260px;
+            bottom: 18%;
+            right: 18%;
+            background: conic-gradient(from 0deg, rgba(234, 88, 12, 0.28), rgba(192, 132, 252, 0.4), rgba(59, 130, 246, 0.24));
+            animation-delay: -4s;
+        }
+        .floating-line {
+            position: absolute;
+            width: 480px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.24), transparent);
+            opacity: 0.6;
+            animation: drift 18s linear infinite;
+        }
+        .floating-line--1 { top: 18%; right: 12%; }
+        .floating-line--2 { bottom: 22%; left: 14%; animation-delay: -6s; }
+        .glass-card {
+            position: relative;
+            background: rgba(15, 23, 42, 0.32);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(22px);
+            box-shadow: 0 35px 90px rgba(8, 47, 73, 0.35);
+            transition: transform 0.8s ease, box-shadow 0.8s ease, border-color 0.5s ease;
+        }
+        .glass-card::before {
+            content: "";
+            position: absolute;
+            inset: 12px;
+            border-radius: inherit;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        .glass-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 45px 100px rgba(30, 64, 175, 0.45);
+            border-color: rgba(255, 255, 255, 0.28);
+        }
+        .glass-card:hover::before {
+            border-color: rgba(255, 255, 255, 0.18);
+        }
+        .header-shell {
+            position: relative;
+            overflow: hidden;
+        }
+        .header-shell::after {
+            content: "";
+            position: absolute;
+            inset: -40%;
+            background: radial-gradient(circle at center, rgba(192, 132, 252, 0.25), transparent 60%);
+            opacity: 0;
+            transition: opacity 1.6s ease;
+        }
+        body.is-ready .header-shell::after {
+            opacity: 1;
+        }
+        .hero-title {
+            letter-spacing: -0.015em;
+            line-height: 1.2;
+        }
+        .gradient-text {
+            background: linear-gradient(120deg, #38bdf8 0%, #c084fc 50%, #f472b6 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            -webkit-text-fill-color: transparent;
+        }
+        .feature-grid {
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        }
+        .feature-card {
+            position: relative;
+            border-radius: 1.5rem;
+            padding: 1.2rem 1.35rem;
+            background: rgba(15, 23, 42, 0.55);
+            border: 1px solid rgba(148, 163, 184, 0.14);
+            transition: transform 0.6s ease, border-color 0.6s ease, background 0.6s ease;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+        .feature-card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: radial-gradient(circle at top, rgba(255, 255, 255, 0.18), transparent 55%);
+            opacity: 0;
+            transition: opacity 0.6s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(148, 163, 184, 0.32);
+            background: rgba(30, 58, 138, 0.55);
+        }
+        .feature-card:hover::after {
+            opacity: 1;
+        }
+        .feature-icon {
+            width: 54px;
+            height: 54px;
+            border-radius: 1.25rem;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(192, 132, 252, 0.24));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.8rem;
+        }
+        .hero-badges {
+            position: relative;
+            padding: 1.25rem;
+            border-radius: 1.5rem;
+            background: rgba(15, 23, 42, 0.52);
+            border: 1px solid rgba(148, 163, 184, 0.14);
+            gap: 1.25rem;
+        }
+        .hero-badges::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: linear-gradient(120deg, rgba(56, 189, 248, 0.18), transparent 70%);
+            opacity: 0.4;
+        }
+        .hero-badges > div {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .hero-badges .badge-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 999px;
+            background: rgba(148, 163, 184, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .pulse-halo {
+            position: absolute;
+            inset: -12px;
+            border-radius: inherit;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.28), transparent 70%);
+            filter: blur(18px);
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+        body.is-ready .pulse-halo {
+            opacity: 1;
+        }
+        .highlight-card {
+            position: relative;
+            overflow: hidden;
+        }
+        .highlight-card::after {
+            content: "";
+            position: absolute;
+            inset: -40%;
+            background: conic-gradient(from 180deg, rgba(56, 189, 248, 0.25), rgba(192, 132, 252, 0.18), rgba(56, 189, 248, 0.25));
+            opacity: 0.25;
+            animation: rotate-slow 28s linear infinite;
+        }
+        .highlight-card > * { position: relative; z-index: 1; }
+        .cta-button {
+            position: relative;
+            background: linear-gradient(120deg, rgba(48, 56, 133, 0.95), rgba(168, 85, 247, 0.95), rgba(244, 114, 182, 0.95));
+            color: #4c1d95;
+            border-radius: 1.75rem;
+            transition: transform 0.45s ease, box-shadow 0.45s ease;
+        }
+        .cta-button::after {
+            content: "";
+            position: absolute;
+            inset: 2px;
+            border-radius: inherit;
+            background: rgba(255, 255, 255, 0.4);
+            opacity: 0;
+            transition: opacity 0.45s ease;
+        }
+        .cta-button:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 45px rgba(244, 114, 182, 0.28);
+        }
+        .cta-button:hover::after {
+            opacity: 1;
+        }
+        footer span {
+            letter-spacing: 0.05em;
+        }
+        body.is-ready .fade-up {
+            opacity: 1;
+            transform: translate3d(0, 0, 0) scale(1);
+        }
+        .fade-up {
+            opacity: 0;
+            transform: translate3d(0, 24px, 0) scale(0.98);
+            transition: opacity 0.9s ease, transform 0.9s ease;
+        }
+        .fade-up[data-delay="1"] { transition-delay: 0.15s; }
+        .fade-up[data-delay="2"] { transition-delay: 0.3s; }
+        .fade-up[data-delay="3"] { transition-delay: 0.45s; }
+        @keyframes health-bg-pan {
+            0% { transform: scale(1.05) translate3d(-1.5%, -1.5%, 0); }
+            50% { transform: scale(1.12) translate3d(2.5%, 2%, 0); }
+            100% { transform: scale(1.07) translate3d(-1%, 1.5%, 0); }
+        }
+        @keyframes float-slow {
+            0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+            50% { transform: translate3d(20px, -25px, 0) scale(1.05); }
+        }
+        @keyframes rotate-slow {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes drift {
+            0% { transform: translate3d(-10%, 0, 0); }
+            100% { transform: translate3d(10%, 0, 0); }
+        }
+        @media (max-width: 1023px) {
+            .header-shell { border-radius: 2.25rem; }
+            .glass-card::before { inset: 10px; }
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen relative overflow-x-hidden">
+    <div class="decorative-layer" aria-hidden="true">
+        <span class="floating-orb floating-orb--1"></span>
+        <span class="floating-orb floating-orb--2"></span>
+        <span class="floating-orb floating-orb--3"></span>
+        <span class="floating-line floating-line--1"></span>
+        <span class="floating-line floating-line--2"></span>
+    </div>
+    <div class="relative z-10 min-h-screen flex flex-col">
+        <header class="px-6 sm:px-10 py-6">
+            <div class="header-shell glass-card rounded-[2.75rem] px-6 sm:px-10 py-6 sm:py-7 border border-white/20 flex flex-col gap-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                    <div class="flex items-center gap-4">
+                        <div class="relative">
+                            <span class="pulse-halo"></span>
+                            <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-3xl bg-white/15 border border-white/20 flex items-center justify-center">
+                                <i data-feather="heart" class="w-8 h-8 text-white"></i>
+                            </div>
+                        </div>
+                        <div class="fade-up" data-delay="1">
+                            <p class="text-white/80 text-sm sm:text-base">منصة الصحة المتكاملة</p>
+                            <h1 class="text-white text-3xl sm:text-4xl font-bold">رفيقك الصحي</h1>
+                        </div>
+                    </div>
+                    <span class="fade-up hidden sm:inline-flex items-center gap-2 text-white/75 text-sm font-medium uppercase tracking-[0.35em]" data-delay="2">انقر للمتابعة <i data-feather="arrow-left" class="w-4 h-4"></i></span>
+                </div>
+                <div class="grid gap-4 sm:grid-cols-2" aria-hidden="true">
+                    <span class="glass-card rounded-2xl px-5 py-4 flex items-center justify-center backdrop-blur-[45px]">
+                        <span class="inline-flex items-center gap-2 text-white/50">
+                            <i data-feather="mouse-pointer" class="w-4 h-4"></i>
+                            <i data-feather="arrow-up-right" class="w-4 h-4"></i>
+                        </span>
+                    </span>
+                    <span class="glass-card rounded-2xl px-5 py-4 flex items-center justify-center backdrop-blur-[45px]">
+                        <span class="inline-flex items-center gap-2 text-white/50">
+                            <i data-feather="circle" class="w-3 h-3"></i>
+                            <i data-feather="circle" class="w-3 h-3"></i>
+                            <i data-feather="circle" class="w-3 h-3"></i>
+                        </span>
+                    </span>
+                </div>
+            </div>
+        </header>
+        <main class="flex-1 px-6 sm:px-10 pb-14">
+            <div class="max-w-6xl mx-auto grid gap-12 lg:grid-cols-[1.08fr_0.92fr] items-start">
+                <section class="space-y-10">
+                    <div class="glass-card rounded-[2.75rem] p-8 sm:p-12 fade-up" data-delay="1">
+                        <div class="hero-panel space-y-8">
+                            <p class="text-white/80 text-sm font-medium tracking-[0.35em] uppercase">تعرف على رفيقك الصحي</p>
+                            <h2 class="hero-title text-white text-4xl sm:text-[2.85rem] font-bold leading-snug">
+                                <span class="gradient-text">مستقبلك الصحي يبدأ بتجربة شخصية ذكية ترافقك في كل خطوة</span>
+                            </h2>
+                            <p class="text-white/85 text-lg leading-relaxed">
+                                نقدم لك منصة عربية متكاملة تجمع بين الذكاء الاصطناعي والمتابعة الصحية اليومية، لتمنحك رؤية شاملة عن نمط حياتك، وتساعدك على اتخاذ قرارات أفضل لصحتك أنت وأحبائك.
+                            </p>
+                            <div class="feature-grid grid gap-5">
+                                <div class="feature-card">
+                                    <div class="feature-icon"><i data-feather="activity" class="w-6 h-6 text-white"></i></div>
+                                    <h3 class="text-white text-xl font-semibold mb-2">متابعة ذكية</h3>
+                                    <p class="text-white/80 text-sm leading-relaxed">راقب القياسات الحيوية بواجهة مرئية سهلة وتحليل فوري للنتائج.</p>
+                                </div>
+                                <div class="feature-card">
+                                    <div class="feature-icon"><i data-feather="message-square" class="w-6 h-6 text-white"></i></div>
+                                    <h3 class="text-white text-xl font-semibold mb-2">استشارات فورية</h3>
+                                    <p class="text-white/80 text-sm leading-relaxed">مساعد صحي بالذكاء الاصطناعي يقدم إجابات مخصصة وموثوقة.</p>
+                                </div>
+                                <div class="feature-card">
+                                    <div class="feature-icon"><i data-feather="calendar" class="w-6 h-6 text-white"></i></div>
+                                    <h3 class="text-white text-xl font-semibold mb-2">تنظيم كامل</h3>
+                                    <p class="text-white/80 text-sm leading-relaxed">تذكير بمواعيد الأدوية، خطط غذائية، وتمارين موجهة لاحتياجاتك.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% if designers %}
+                    <div class="glass-card rounded-[2.75rem] p-8 sm:p-12 shadow-2xl space-y-8 fade-up" data-delay="2" data-designer-slider-root>
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+                            <h3 class="text-white text-3xl sm:text-4xl font-bold tracking-tight">Website Designers</h3>
+                            <div class="flex items-center gap-3">
+                                <button type="button" data-designer-prev class="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center text-white transition hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/40">
+                                    <i data-feather="chevron-right" class="w-6 h-6"></i>
+                                </button>
+                                <button type="button" data-designer-next class="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center text-white transition hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/40">
+                                    <i data-feather="chevron-left" class="w-6 h-6"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <div class="relative h-[28rem] overflow-visible" data-designer-slider>
+                                {% for designer in designers %}
+                                <figure data-slide{% if designer.is_featured %} data-featured{% endif %} class="absolute inset-0 flex flex-col items-center justify-center gap-8 px-8 text-center transition-all duration-[900ms] ease-out opacity-0 pointer-events-none scale-90 translate-x-8">
+                                    <div class="relative">
+                                        <div class="w-48 h-48 sm:w-60 sm:h-80 rounded-full overflow-hidden shadow-[0_28px_80px_rgba(15,23,42,0.5)] ring-8 ring-white/25 border border-white/10 transition-all duration-500 transform-gpu group clip-circle">
+                                            <img src="{{ url_for('designer_asset', filename=designer.filename) }}" alt="{{ designer.label }}" class="w-full h-full object-cover object-center transition-all duration-500 group-hover:scale-130" loading="lazy">
+                                        </div>
+                                        {% if designer.is_featured %}
+                                        <div class="absolute inset-0 -z-10 animate-pulse-slow">
+                                            <div class="w-60 h-60 sm:w-72 sm:h-72 rounded-full bg-gradient-to-br from-purple-400/60 via-white/30 to-blue-400/50 blur-xl"></div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <figcaption class="text-white text-xl sm:text-2xl font-semibold uppercase tracking-[0.35em]">{{ designer.label }}</figcaption>
+                                </figure>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="flex justify-center gap-3">
+                            {% for designer in designers %}
+                            <span data-designer-dot class="h-2 w-6 rounded-full bg-white/30 transition-all duration-500 ease-out"></span>
+                            {% endfor %}
+                        </div>
+                        <div class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs text-white/70">
+                            <div class="flex items-center gap-2">
+                                <span class="inline-block w-3 h-3 rounded-full bg-white"></span>
+                                <span>الصورة الحالية</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="inline-block w-3 h-3 rounded-full bg-white/30"></span>
+                                <span>صورة قادمة</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    <div class="hero-badges flex flex-wrap items-center gap-5">
+                        <div class="flex items-center gap-3">
+                            <div class="badge-icon"><i data-feather="shield" class="w-5 h-5"></i></div>
+                            <span class="text-sm">خصوصية كاملة للبيانات الصحية</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="badge-icon"><i data-feather="clock" class="w-5 h-5"></i></div>
+                            <span class="text-sm">تجربة تفاعلية على مدار الساعة</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="badge-icon"><i data-feather="smile" class="w-5 h-5"></i></div>
+                            <span class="text-sm">واجهات عربية ملهمة وسهلة الاستخدام</span>
+                        </div>
+                    </div>
+                </section>
+                <aside class="space-y-7 fade-up" data-delay="2">
+                    <div class="glass-card highlight-card rounded-[2.75rem] p-8 sm:p-10 border border-white/20 space-y-6">
+                        <div class="bg-white/10 border border-white/20 rounded-3xl p-6 sm:p-7 space-y-3">
+                            <p class="text-white/70 text-sm font-medium">خطوة واحدة تفصلك عن عالم صحي متكامل</p>
+                            <h3 class="text-white text-3xl font-bold leading-tight">ابدأ الآن واستكشف لوحة تحكم تجمع كل ما يهم صحتك</h3>
+                            <p class="text-white/70 leading-relaxed text-sm">
+                                خطة غذائية مخصصة، تنبيهات للأدوية، استشارات فورية، رسائل إيجابية، وتمارين مصممة لروتينك اليومي.
+                            </p>
+                        </div>
+                        <div class="glass-card rounded-3xl p-6 space-y-3 text-white/80 text-sm">
+                            <div class="flex items-center gap-3">
+                                <i data-feather="check" class="w-5 h-5"></i>
+                                <span>مصمم خصيصًا للمستخدم العربي</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <i data-feather="check" class="w-5 h-5"></i>
+                                <span>تجربة سلسة تدعم مختلف الأعمار</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <i data-feather="check" class="w-5 h-5"></i>
+                                <span>تكامل صوتي ورسائل تحفيزية يومية</span>
+                            </div>
+                        </div>
+                        <a href="{{ url_for('register') }}" class="cta-button block text-center w-full py-4 font-bold text-lg shadow-lg">
+                            إنشاء حساب جديد
+                        </a>
+                        <p class="text-center text-white/70 text-xs">أي تفاعل مع هذه الصفحة ينقلك لإنشاء حساب</p>
+                    </div>
+                </aside>
+            </div>
+        </main>
+        <footer class="px-6 sm:px-10 pb-8 text-white/65 text-xs sm:text-sm">
+            <div class="max-w-6xl mx-auto flex flex-wrap justify-between gap-4">
+                <span>© رفيقك الصحي. جميع الحقوق محفوظة.</span>
+                <span class="text-center">This website was designed and developed by Eng. Mohamed Asem<br> and the database was professionally designed and implemented by Eng. Rawan Magdy.</span>
+                <span >جاهزون لبدء رحلتك الصحية الذكية.</span>
+            </div>
+        </footer>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.body.classList.add('is-ready');
+            feather.replace();
+            const sliderRoot = document.querySelector('[data-designer-slider-root]');
+            if (sliderRoot) {
+                const slider = sliderRoot.querySelector('[data-designer-slider]');
+                const slides = slider ? slider.querySelectorAll('[data-slide]') : [];
+                if (slides.length) {
+                    const prev = sliderRoot.querySelector('[data-designer-prev]');
+                    const next = sliderRoot.querySelector('[data-designer-next]');
+                    const dots = sliderRoot.querySelectorAll('[data-designer-dot]');
+                    let index = 0;
+                    const featuredIndex = Array.from(slides).findIndex((slide) => slide.querySelector('[data-featured]'));
+                    const activate = (i) => {
+                        slides.forEach((slide, idx) => {
+                            const isActive = idx === i;
+                            slide.classList.toggle('opacity-100', isActive);
+                            slide.classList.toggle('opacity-0', !isActive);
+                            slide.classList.toggle('translate-x-0', isActive);
+                            slide.classList.toggle('translate-x-8', !isActive && idx > i);
+                            slide.classList.toggle('-translate-x-8', !isActive && idx < i);
+                            slide.classList.toggle('scale-100', isActive);
+                            slide.classList.toggle('scale-90', !isActive);
+                            const avatar = slide.querySelector('.clip-circle');
+                            if (avatar) {
+                                avatar.classList.toggle('ring-4', isActive);
+                                avatar.classList.toggle('ring-2', !isActive);
+                            }
+                        });
+                        dots.forEach((dot, idx) => {
+                            const isActive = idx === i;
+                            dot.classList.toggle('bg-white', isActive);
+                            dot.classList.toggle('bg-white/30', !isActive);
+                            dot.classList.toggle('w-12', isActive);
+                            dot.classList.toggle('w-6', !isActive);
+                        });
+                    };
+                    const goTo = (i, manual = false) => {
+                        index = (i + slides.length) % slides.length;
+                        activate(index);
+                        if (manual) {
+                            resetTimer();
+                        }
+                    };
+                    let timer = setInterval(() => goTo(index + 1), 4500);
+                    const resetTimer = () => {
+                        clearInterval(timer);
+                        timer = setInterval(() => goTo(index + 1), 4500);
+                    };
+                    prev?.addEventListener('click', () => goTo(index - 1, true));
+                    next?.addEventListener('click', () => goTo(index + 1, true));
+                    dots.forEach((dot, idx) => {
+                        dot.addEventListener('click', () => goTo(idx, true));
+                    });
+                    slider.addEventListener('mouseenter', () => clearInterval(timer));
+                    slider.addEventListener('mouseleave', resetTimer);
+                    if (featuredIndex >= 0) {
+                        const featuredSlide = slides[featuredIndex];
+                        const spotlight = document.createElement('div');
+                        spotlight.dataset.featuredHalo = '';
+                        spotlight.className = 'absolute inset-0 -z-20 animate-[pulse_5s_ease-in-out_infinite]';
+                        spotlight.innerHTML = '<div class="w-full h-full flex items-center justify-center"><div class="w-64 h-64 sm:w-80 sm:h-80 rounded-full border border-white/20 bg-gradient-to-tr from-white/10 via-purple-500/40 to-blue-500/30 blur-2xl"></div></div>';
+                        featuredSlide.appendChild(spotlight);
+                        goTo(featuredIndex);
+                    } else {
+                        goTo(0);
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>رفيقك الصحي - تسجيل الدخول</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap');
+        :root {
+            color-scheme: dark;
+            --bg-base: #020617;
+            --bg-deep: #0b1220;
+            --accent-1: #38bdf8;
+            --accent-2: #c084fc;
+            --accent-3: #f472b6;
+            --accent-4: #5eead4;
+            --glass: rgba(15, 23, 42, 0.65);
+            --glass-border: rgba(148, 163, 184, 0.24);
+            --glass-highlight: rgba(255, 255, 255, 0.08);
+            --transition-curve: cubic-bezier(0.22, 1, 0.36, 1);
+            --text-primary: #e0f2fe;
+            --text-secondary: rgba(224, 242, 254, 0.92);
+            --text-muted: rgba(186, 230, 253, 0.78);
+        }
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+        ::selection {
+            background: rgba(124, 58, 237, 0.35);
+            color: var(--text-primary);
+        }
+        body {
+            font-family: 'Tajawal', sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            background: var(--bg-base);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            position: relative;
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            inset: -15%;
+            background:
+                radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.32), transparent 58%),
+                radial-gradient(circle at 78% 18%, rgba(192, 132, 252, 0.38), transparent 60%),
+                radial-gradient(circle at 50% 88%, rgba(244, 114, 182, 0.24), transparent 60%);
+            opacity: 0.85;
+            filter: saturate(130%);
+            z-index: -6;
+            animation: backgroundPulse 34s ease-in-out infinite alternate;
+        }
+        body::after {
+            content: "";
+            position: fixed;
+            inset: -40%;
+            background: conic-gradient(from 120deg, rgba(99, 102, 241, 0.18), transparent 40%, rgba(56, 189, 248, 0.22), transparent 78%);
+            opacity: 0.6;
+            filter: blur(120px);
+            z-index: -7;
+            animation: auroraDrift 42s linear infinite;
+        }
+        .gradient-bg {
+            position: relative;
+            min-height: 100vh;
+            z-index: 0;
+        }
+        .gradient-bg::before,
+        .gradient-bg::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: -5;
+        }
+        .gradient-bg::before {
+            background: linear-gradient(120deg, rgba(15, 23, 42, 0.88), rgba(30, 58, 138, 0.62), rgba(124, 58, 237, 0.52), rgba(45, 212, 191, 0.32));
+            mix-blend-mode: screen;
+            opacity: 0.9;
+        }
+        .gradient-bg::after {
+            background: url("{{ url_for('health_background') }}") center/cover no-repeat;
+            opacity: 0.32;
+            filter: brightness(0.46) saturate(1.35) contrast(1.12);
+            transform: scale(1.18);
+            animation: heroParallax 48s cubic-bezier(0.22, 1, 0.36, 1) infinite alternate;
+        }
+        .ambient-lights {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: -4;
+            overflow: hidden;
+        }
+        .ambient-lights span {
+            position: absolute;
+            width: clamp(180px, 26vw, 320px);
+            height: clamp(180px, 26vw, 320px);
+            border-radius: 9999px;
+            opacity: 0.45;
+            filter: blur(80px);
+            animation: floatOrbit 28s ease-in-out infinite;
+        }
+        .ambient-lights .ambient--one {
+            top: -6%;
+            right: -8%;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.65), transparent 65%);
+            animation-delay: -4s;
+        }
+        .ambient-lights .ambient--two {
+            bottom: -12%;
+            left: -6%;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.55), transparent 70%);
+            animation-delay: -10s;
+        }
+        .ambient-lights .ambient--three {
+            top: 30%;
+            left: 42%;
+            background: radial-gradient(circle, rgba(244, 114, 182, 0.45), transparent 70%);
+            animation-delay: -18s;
+        }
+        .glass-effect {
+            position: relative;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 2rem;
+            backdrop-filter: blur(26px);
+            box-shadow: 0 35px 70px rgba(8, 47, 73, 0.45);
+            transition: transform 0.6s var(--transition-curve), border-color 0.6s var(--transition-curve), box-shadow 0.6s var(--transition-curve);
+            overflow: hidden;
+        }
+        .glass-effect::before {
+            content: "";
+            position: absolute;
+            inset: 1.5px;
+            border-radius: inherit;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            pointer-events: none;
+            z-index: 1;
+        }
+        .glass-effect::after {
+           
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, transparent 35%, rgba(148, 163, 184, 0.22));
+            opacity: 0;
+            transition: opacity 0.6s var(--transition-curve);
+            z-index: 1;
+        }
+        .glass-effect:hover {
+            transform: translateY(-8px);
+            border-color: rgba(148, 163, 184, 0.45);
+            box-shadow: 0 45px 90px rgba(15, 23, 42, 0.55);
+        }
+        .glass-effect:hover::after {
+            opacity: 1;
+        }
+        .glass-content {
+            position: relative;
+            z-index: 2;
+        }
+        .icon-emblem {
+            position: relative;
+            width: 86px;
+            height: 86px;
+            border-radius: 2.5rem;
+            display: grid;
+            place-items: center;
+            background: radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.3), rgba(79, 70, 229, 0.75));
+            box-shadow: 0 20px 35px rgba(79, 70, 229, 0.4);
+        }
+        .icon-emblem::after {
+            content: "";
+            position: absolute;
+            inset: 12%;
+            border-radius: inherit;
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            opacity: 0.6;
+        }
+        .headline {
+            font-size: clamp(2rem, 4vw, 2.65rem);
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            background: linear-gradient(120deg, #f8fafc 0%, rgba(190, 242, 100, 0.9) 50%, rgba(125, 211, 252, 0.95) 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            -webkit-text-fill-color: transparent;
+            margin:0;
+        } 
+        .lead-text {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+        }
+        .status-bubble {
+            background: rgba(15, 118, 110, 0.28);
+            border: 1px solid rgba(45, 212, 191, 0.4);
+            color: #ecfdf5;
+            border-radius: 999px;
+            padding: 0.35rem 1.1rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .flash-message {
+            border-radius: 1.25rem;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            background: rgba(148, 163, 184, 0.12);
+            color: var(--text-primary);
+            padding: 1rem 1.2rem;
+            font-weight: 600;
+            text-align: center;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.28);
+        }
+        .flash-message.error {
+            border-color: rgba(248, 113, 113, 0.55);
+            background: rgba(248, 113, 113, 0.16);
+            color: #fee2e2;
+        }
+        form .field-label {
+            display: block;
+            margin-bottom: 0.65rem;
+            font-weight: 600;
+            color: rgba(224, 242, 254, 0.98);
+        }
+        .input-shell {
+            position: relative;
+        }
+        .input-shell input {
+            width: 100%;
+            padding: 0.9rem 1.1rem;
+            border-radius: 1rem;
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.72), rgba(15, 23, 42, 0.45));
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            transition: border-color 0.45s var(--transition-curve), box-shadow 0.45s var(--transition-curve), transform 0.45s var(--transition-curve);
+        }
+        .input-shell input::placeholder {
+            color: var(--text-muted);
+        }
+        .input-shell input:focus {
+            outline: none;
+            border-color: rgba(56, 189, 248, 0.85);
+            box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.24), 0 22px 55px rgba(15, 23, 42, 0.45);
+            transform: translateY(-2px);
+        }
+        .button-primary {
+            position: relative;
+            width: 100%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.65rem;
+            border-radius: 1.05rem;
+            border: none;
+            padding: 1rem 1.4rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            background: linear-gradient(120deg, rgba(48, 56, 133, 0.95), rgba(168, 85, 247, 0.95), rgba(244, 114, 182, 0.95));
+            color: #312e81;
+            box-shadow: 0 30px 55px rgba(124, 58, 237, 0.28);
+            transition: transform 0.55s var(--transition-curve), box-shadow 0.55s var(--transition-curve);
+        }
+        .button-primary::after {
+            content: "";
+            position: absolute;
+            inset: 2px;
+            border-radius: inherit;
+            background: linear-gradient(120deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.12));
+            opacity: 0;
+            transition: opacity 0.55s var(--transition-curve);
+        }
+        .button-primary:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 32px 65px rgba(56, 189, 248, 0.32);
+        }
+        .button-primary:hover::after {
+            opacity: 1;
+        }
+        .button-primary:active {
+            transform: translateY(-1px) scale(0.99);
+        }
+        .form-footer {
+            text-align: center;
+            color: var(--text-muted);
+        }
+        .form-footer a {
+            color: var(--text-primary);
+            font-weight: 700;
+            transition: color 0.45s var(--transition-curve), text-shadow 0.45s var(--transition-curve);
+        }
+        .form-footer a:hover {
+            color: #c084fc;
+            text-shadow: 0 0 25px rgba(192, 132, 252, 0.45);
+        }
+        .deco-aurora {
+            position: absolute;
+            inset: -30%;
+            background: radial-gradient(circle at 30% 30%, rgba(56, 189, 248, 0.38), transparent 65%);
+            opacity: 0.35;
+            filter: blur(35px);
+            animation: orbitShift 26s ease-in-out infinite;
+            z-index: 0;
+        }
+        .deco-aurora--secondary {
+            inset: auto;
+            bottom: -45%;
+            right: -30%;
+            left: -20%;
+            top: auto;
+            background: radial-gradient(circle at 65% 45%, rgba(244, 114, 182, 0.32), transparent 70%);
+            animation-delay: -12s;
+        }
+        [data-animate] {
+            opacity: 0;
+            transform: translate3d(0, 24px, 0) scale(0.98);
+            transition: opacity 0.8s var(--transition-curve), transform 0.8s var(--transition-curve);
+        }
+        [data-animate].is-visible {
+            opacity: 1;
+            transform: translate3d(0, 0, 0) scale(1);
+        }
+        #pointer-glow {
+            position: fixed;
+            width: 240px;
+            height: 240px;
+            border-radius: 50%;
+            pointer-events: none;
+            margin: 0;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.35) 0%, rgba(56, 189, 248, 0.25) 36%, rgba(192, 132, 252, 0.2) 62%, transparent 90%);
+            filter: blur(18px);
+            opacity: 0;
+            transform: translate3d(calc(var(--glow-x, 50vw) - 120px), calc(var(--glow-y, 50vh) - 120px), 0) scale(var(--glow-scale, 1));
+            transition: opacity 0.32s ease, transform 0.18s ease;
+            z-index: 40;
+        }
+        body.is-pointer-active #pointer-glow {
+            opacity: 0.95;
+        }
+        #pointer-glow.is-pressed {
+            --glow-scale: 0.9;
+        }
+        @keyframes backgroundPulse {
+            0% {
+                transform: scale(1) translate3d(0, 0, 0);
+            }
+            50% {
+                transform: scale(1.05) translate3d(12px, -18px, 0);
+            }
+            100% {
+                transform: scale(1.08) translate3d(-14px, 16px, 0);
+            }
+        }
+        @keyframes auroraDrift {
+            0% {
+                transform: rotate(0deg) scale(1);
+            }
+            100% {
+                transform: rotate(360deg) scale(1.05);
+            }
+        }
+        @keyframes heroParallax {
+            0% {
+                transform: scale(1.12) translate3d(-2%, -1%, 0);
+            }
+            50% {
+                transform: scale(1.16) translate3d(2%, 2%, 0);
+            }
+            100% {
+                transform: scale(1.12) translate3d(-1%, 1%, 0);
+            }
+        }
+        @keyframes floatOrbit {
+            0% {
+                transform: translate3d(0, 0, 0) scale(1);
+            }
+            50% {
+                transform: translate3d(24px, -32px, 0) scale(1.05);
+            }
+            100% {
+                transform: translate3d(-18px, 28px, 0) scale(0.98);
+            }
+        }
+        @keyframes orbitShift {
+            0% {
+                transform: translate3d(0, 0, 0) scale(1);
+            }
+            50% {
+                transform: translate3d(-18px, 22px, 0) scale(1.08);
+            }
+            100% {
+                transform: translate3d(14px, -18px, 0) scale(0.96);
+            }
+        }
+        @media (max-width: 640px) {
+            .glass-effect {
+                border-radius: 1.6rem;
+                padding: 2.5rem 1.75rem;
+            }
+            .icon-emblem {
+                width: 78px;
+                height: 78px;
+            }
+            .headline {
+                font-size: 2.15rem;
+            }
+            .ambient-lights span {
+                filter: blur(65px);
+            }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+            [data-animate] {
+                opacity: 1 !important;
+                transform: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen flex items-center justify-center px-4 py-10">
+    <div class="ambient-lights" aria-hidden="true">
+        <span class="ambient ambient--one"></span>
+        <span class="ambient ambient--two"></span>
+        <span class="ambient ambient--three"></span>
+    </div>
+    <div class="glass-effect glass-content w-full max-w-lg p-8 md:p-12 space-y-10" data-animate>
+        <span class="deco-aurora" aria-hidden="true"></span>
+        <span class="deco-aurora deco-aurora--secondary" aria-hidden="true"></span>
+        <div class="glass-content space-y-6 text-center" data-animate>
+            <div class="icon-emblem mx-auto">
+                <i data-feather="heart" class="w-10 h-10 text-white"></i>
+            </div>
+            <h1 class="headline">رفيقك الصحي</h1>
+            <p class="lead-text">نظامك الصحي المتكامل</p>
+        </div>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="space-y-3" data-animate>
+            {% for category, message in messages %}
+            {% if category == 'success' %}
+            <div class="flash-message">{{ message }}</div>
+            {% else %}
+            <div class="flash-message error">{{ message }}</div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+        <form action="{{ url_for('login') }}" method="POST" class="space-y-6 glass-content" data-animate>
+            <div>
+                <label class="field-label">البريد الإلكتروني</label>
+                <div class="input-shell">
+                    <input type="email" name="email" value="{{ request.form.get('email', '') }}" placeholder="example@email.com" required>
+                </div>
+            </div>
+            <div>
+                <label class="field-label">كلمة المرور</label>
+                <div class="input-shell">
+                    <input type="password" name="password" placeholder="••••••••" required>
+                </div>
+            </div>
+            <button type="submit" class="button-primary">
+                تسجيل الدخول
+            </button>
+        </form>
+        <div class="form-footer" data-animate>
+            <p>ليس لديك حساب؟</p>
+            <a href="{{ url_for('register') }}">إنشاء حساب جديد</a>
+        </div>
+    </div>
+    <script>
+        const initPointerGlow = () => {
+            if (document.getElementById('pointer-glow')) {
+                return;
+            }
+            const glow = document.createElement('span');
+            glow.id = 'pointer-glow';
+            document.body.appendChild(glow);
+            const setPosition = (x, y) => {
+                glow.style.setProperty('--glow-x', `${x}px`);
+                glow.style.setProperty('--glow-y', `${y}px`);
+            };
+            const activate = () => document.body.classList.add('is-pointer-active');
+            const deactivate = () => document.body.classList.remove('is-pointer-active');
+            window.addEventListener('pointermove', (event) => {
+                activate();
+                setPosition(event.clientX, event.clientY);
+            }, { passive: true });
+            window.addEventListener('pointerdown', () => glow.classList.add('is-pressed'), { passive: true });
+            window.addEventListener('pointerup', () => glow.classList.remove('is-pressed'), { passive: true });
+            window.addEventListener('pointerleave', deactivate, { passive: true });
+            window.addEventListener('touchstart', (event) => {
+                const primary = event.touches[0];
+                if (!primary) {
+                    return;
+                }
+                activate();
+                setPosition(primary.clientX, primary.clientY);
+            }, { passive: true });
+            window.addEventListener('touchmove', (event) => {
+                const primary = event.touches[0];
+                if (!primary) {
+                    return;
+                }
+                setPosition(primary.clientX, primary.clientY);
+            }, { passive: true });
+            window.addEventListener('touchend', deactivate, { passive: true });
+        };
+        const initRevealAnimations = () => {
+            const animatedElements = document.querySelectorAll('[data-animate]');
+            if (!animatedElements.length) {
+                return;
+            }
+            const reveal = (element) => {
+                element.classList.add('is-visible');
+            };
+            const observer = new IntersectionObserver((entries, obs) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        reveal(entry.target);
+                        obs.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.2,
+                rootMargin: '0px 0px -40px 0px'
+            });
+            animatedElements.forEach((element) => observer.observe(element));
+            window.addEventListener('load', () => {
+                animatedElements.forEach((element) => {
+                    const rect = element.getBoundingClientRect();
+                    if (rect.top <= window.innerHeight) {
+                        reveal(element);
+                    }
+                });
+            });
+        };
+        const applyAnimationDelays = () => {
+            document.querySelectorAll('[data-animate][data-animate-delay]').forEach((element) => {
+                element.style.transitionDelay = element.dataset.animateDelay;
+            });
+        };
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.feather) {
+                feather.replace();
+            }
+            initPointerGlow();
+            applyAnimationDelays();
+            initRevealAnimations();
+        });
+    </script>
+</body>
+</html>
